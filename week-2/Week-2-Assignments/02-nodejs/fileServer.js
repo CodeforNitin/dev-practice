@@ -20,6 +20,39 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const port = 3000;
+
+const filesArr = [];
+fs.readdir('./files', (err, files) => {
+  if (err) {
+    console.error('Error reading directory:', err);
+    return;
+  }
+  console.log('Files in directory:', files);
+  filesArr.push(files); 
+  console.log('Files in ARRAY:', filesArr);
+});
+
+app.get('/', (req, res) => {
+
+  // not working
+  // const arr2 = [];
+
+  // files.map((file) => {
+  //   arr2.push({ file });
+  // });
+
+  // res.send(arr2);
+
+  const arr2 = filesArr.map(file => ({ file }));
+
+  res.status(200).json(arr2);
+});
+
+
+app.listen(port, ()=>{
+  console.log(`server running on ${port}`)
+})
 
 
 module.exports = app;
