@@ -16,43 +16,67 @@
 
     Testing the server - run `npm run test-fileServer` command in terminal
  */
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const app = express();
 const port = 3000;
 
+/*
+The expected API endpoints are defined below,
+1. GET /files - Returns a list of files present in `./files/` directory
+  Response: 200 OK with an array of file names in JSON format.
+  Example: GET http://localhost:3000/files
+*/
+
 const filesArr = [];
-fs.readdir('./files', (err, files) => {
+fs.readdir("./files", (err, files) => {
   if (err) {
-    console.error('Error reading directory:', err);
+    console.error("Error reading directory:", err);
     return;
   }
-  console.log('Files in directory:', files);
-  filesArr.push(files); 
-  console.log('Files in ARRAY:', filesArr);
+  filesArr.push(files);
 });
 
-app.get('/', (req, res) => {
+app.get("/files", (req, res) => {
+  res.status(200).json(filesArr.map((file) => ({ file })));
+});
 
-  // not working
-  // const arr2 = [];
+/*
 
-  // files.map((file) => {
-  //   arr2.push({ file });
-  // });
+2. GET /file/:filename - Returns content of given file by name
+     Description: Use the filename from the request path parameter to read the file from `./files/` directory
+     Response: 200 OK with the file content as the response body if found, or 404 Not Found if not found. Should return `File not found` as text if file is not found
+     Example: GET http://localhost:3000/file/example.txt
 
-  // res.send(arr2);
+    - For any other route not defined in the server return 404
+*/
 
-  const arr2 = filesArr.map(file => ({ file }));
+app.get("/files/:fileName", (req, res) => {
+  
+  const ans  = req.params.fileName;
+  console.log(ans);
 
-  res.status(200).json(arr2);
+  const filePath = path.join(__dirname, "files", ans);
+  console.log(filePath);
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      return res.status(404).send("File not found");
+    }
+    res.status(200).send(data);
+  });
+});
+
+//For any other route not defined in the server, return 404
+app.use((req, res) => {
+  res.status(404).send("Not Found");
 });
 
 
-app.listen(port, ()=>{
-  console.log(`server running on ${port}`)
-})
-
+app.listen(port, () => {
+  console.log(`server running on ${port}`);
+});
 
 module.exports = app;
