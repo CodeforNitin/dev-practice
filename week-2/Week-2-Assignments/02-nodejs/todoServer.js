@@ -43,7 +43,7 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser');
-const data = require('./data')
+let data = require('./data')
 const port = 3000;
 
 /*
@@ -73,12 +73,36 @@ app.get('/todos/:id', (req, res) => {
   const todo = data.find(item => item.id === Number(id));
 
   if (todo) {
-    res.json(todo);
+    res.status(200).json(todo);
   } else {
     res.status(404).send('Todo not found');
   }
-});
+}); 
 
+/*
+5. DELETE /todos/:id - Delete a todo item by ID
+Description: Deletes a todo item identified by its ID.
+Response: 200 OK if the todo item was found and deleted, or 404 Not Found if not found.
+Example: DELETE http://localhost:3000/todos/123
+
+- For any other route not defined in the server return 404
+*/
+
+
+app.delete('/todos/:id', (req, res) => {
+  const id = Number(req.params.id);
+
+  // Filter out the todo item with the specified ID
+  const filteredTodos = data.filter(item => item.id !== id);
+
+  if (filteredTodos.length < data.length) {
+    // Update the todos array with the filtered array
+    data = filteredTodos;
+    res.send(`Todo item with ID ${id} deleted successfully.`);
+  } else {
+    res.status(404).send('Todo item not found.');
+  }
+});
 
 app.use(bodyParser.json());
 
